@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
+using System;
 
 /**
  * The goal is to define in a very generic way a UI Element (Input Field, Slider, Text, Button etc)
@@ -14,7 +14,7 @@ public class UI_Element : MonoBehaviour
     private string[] ui_Value;
     private string prev_Value;
 
-    public string text;
+    public string destination;
     public COMMAND command;
 
     // Start is called before the first frame update
@@ -22,7 +22,7 @@ public class UI_Element : MonoBehaviour
     {
         ui_Value = new string[2];
         command = COMMAND.IGNORE;
-        text = "";
+        destination = "";
         SetToDefault();
     }
 
@@ -34,24 +34,48 @@ public class UI_Element : MonoBehaviour
             SendInputToParent();
             prev_Value = ui_Value[0];
         }
-        ui_Value[1] = text;
+        ui_Value[1] = destination;
     }
 
-    public void OnValueChange_String(string value)
+    public void OnValueChange(string value)
     {
         ui_Value[0] = value;
     }
 
-    public void OnValueChange_Float(float value)
+    public void OnValueChange(float value)
     {
         ui_Value[0] = value.ToString();
     }
 
-    public void ReceiveAndDisplay(string value, string receiver)
+    public void OnValueChange(int value)
+    {
+        ui_Value[0] = value.ToString();
+    }
+
+    public void ReceiveAndDisplay<T>(T value, string receiver) where T : IConvertible
     {
         if (receiver == name)
         {
-            GetComponent<Text>().text = value;
+            if(value.GetType() == typeof(string))
+            {
+                GetComponent<Text>().text = value.ToString();
+            }
+            else if (value.GetType() == typeof(string[]))
+            {
+                string[] tmp = (string[])Convert.ChangeType(value, typeof(string[]));
+                if(tmp.Length<1)
+                {
+                    return;
+                }
+                GetComponent<Dropdown>().options.RemoveRange(0, GetComponent<Dropdown>().options.Count);
+                Dropdown.OptionData option;
+                for (int i = 0; i<tmp.Length; i++)
+                {
+                    option = new Dropdown.OptionData(tmp[i]);
+                    GetComponent<Dropdown>().options.Add(option);
+                }
+                
+            }
         }
         else
         {
