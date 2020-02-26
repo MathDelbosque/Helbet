@@ -21,7 +21,6 @@ public class UI_Element : MonoBehaviour
     void Start()
     {
         ui_Value = new string[2];
-        command = COMMAND.IGNORE;
         destination = "";
         SetToDefault();
     }
@@ -31,7 +30,16 @@ public class UI_Element : MonoBehaviour
     {
         if (prev_Value != ui_Value[0])
         {
-            SendInputToParent();
+            if(command == COMMAND.CHECK_DATA)
+            {
+                Debug.Log("Checking Data");
+                CheckDataType();
+            }
+            else
+            {
+                SendInputToParent();
+            }
+            
             prev_Value = ui_Value[0];
         }
         ui_Value[1] = destination;
@@ -95,5 +103,21 @@ public class UI_Element : MonoBehaviour
         ui_Value[0] = "";
         ui_Value[1] = "";
         prev_Value = "";
+    }
+
+    private DATA_TYPES CheckDataType()
+    {
+        Debug.Log("Start data check");
+        foreach(char Chr in ui_Value[0])
+        {
+            if(Chr == '@')
+            {
+                string[] Email = ui_Value[0].Split('@');
+                Debug.Log("Data is Email, Prefix: " + Email[0] + ", Suffix: " + Email[1]); //CHECK IF BOTH STRINGS ARE NOT EMPTY
+                return DATA_TYPES.EMAIL;
+            }
+        }
+        Debug.Log("Data is undefined");
+        return DATA_TYPES.UNDEF;
     }
 }
